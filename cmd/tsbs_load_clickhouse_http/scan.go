@@ -3,14 +3,17 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"strings"
 
 	"github.com/timescale/tsbs/load"
 )
 
 const errNotThreeTuplesFmt = "parse error: line does not have 3 tuples, has %d"
 
-var newLine = []byte("\n")
+var newLine = []byte(" ")
+
+type point struct {
+	row string
+}
 
 type decoder struct {
 	scanner *bufio.Scanner
@@ -24,7 +27,9 @@ func (d *decoder) Decode(_ *bufio.Reader) *load.Point {
 		fatal("scan error: %v", d.scanner.Err())
 		return nil
 	}
-	return load.NewPoint(d.scanner.Bytes())
+	return load.NewPoint(&point{
+		row: d.scanner.Text(),
+	})
 }
 
 type batch struct {
@@ -39,19 +44,9 @@ func (b *batch) Len() int {
 
 func (b *batch) Append(item *load.Point) {
 	that := item.Data.([]byte)
-	thatStr := string(that)
 	b.rows++
-	// Each influx line is format "csv-tags csv-fields timestamp", so we split by space
-	// and then on the middle element, we split by comma to count number of fields added
-	args := strings.Split(thatStr, " ")
-	if len(args) != 3 {
-		fatal(errNotThreeTuplesFmt, len(args))
-		return
-	}
-	b.metrics += uint64(len(strings.Split(args[1], ",")))
-
 	b.buf.Write(that)
-	b.buf.Write(newLine)
+	//b.buf.Write(newLine)
 }
 
 type factory struct{}

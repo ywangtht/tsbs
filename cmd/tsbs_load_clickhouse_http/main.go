@@ -11,7 +11,6 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -21,12 +20,8 @@ import (
 
 // Program option vars:
 var (
-	daemonURLs        []string
-	replicationFactor int
-	backoff           time.Duration
-	useGzip           bool
-	doAbortOnExist    bool
-	consistency       string
+	daemonURLs     []string
+	doAbortOnExist bool
 )
 
 // Global vars
@@ -34,13 +29,6 @@ var (
 	loader  *load.BenchmarkRunner
 	bufPool sync.Pool
 )
-
-var consistencyChoices = map[string]struct{}{
-	"any":    struct{}{},
-	"one":    struct{}{},
-	"quorum": struct{}{},
-	"all":    struct{}{},
-}
 
 // allows for testing
 var fatal = log.Fatalf
@@ -51,11 +39,7 @@ func init() {
 	config.AddToFlagSet(pflag.CommandLine)
 	var csvDaemonURLs string
 
-	pflag.String("urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
-	pflag.Int("replication-factor", 1, "Cluster replication factor (only applies to clustered databases).")
-	pflag.String("consistency", "all", "Write consistency. Must be one of: any, one, quorum, all.")
-	pflag.Duration("backoff", time.Second, "Time to sleep between requests when server indicates backpressure is needed.")
-	pflag.Bool("gzip", true, "Whether to gzip encode requests (default true).")
+	pflag.String("urls", "http://localhost:8123", "ClickHouse Server URLs, comma-separated. Will be used in a round-robin fashion.")
 
 	pflag.Parse()
 
@@ -70,14 +54,6 @@ func init() {
 	}
 
 	csvDaemonURLs = viper.GetString("urls")
-	replicationFactor = viper.GetInt("replication-factor")
-	consistency = viper.GetString("consistency")
-	backoff = viper.GetDuration("backoff")
-	useGzip = viper.GetBool("gzip")
-
-	if _, ok := consistencyChoices[consistency]; !ok {
-		log.Fatalf("invalid consistency settings")
-	}
 
 	daemonURLs = strings.Split(csvDaemonURLs, ",")
 	if len(daemonURLs) == 0 {
