@@ -12,7 +12,7 @@ const errNotThreeTuplesFmt = "parse error: line does not have 3 tuples, has %d"
 var newLine = []byte(" ")
 
 type point struct {
-	row string
+	Data interface{}
 }
 
 type decoder struct {
@@ -27,9 +27,7 @@ func (d *decoder) Decode(_ *bufio.Reader) *load.Point {
 		fatal("scan error: %v", d.scanner.Err())
 		return nil
 	}
-	return load.NewPoint(&point{
-		row: d.scanner.Text(),
-	})
+	return load.NewPoint(d.scanner.Bytes())
 }
 
 type batch struct {

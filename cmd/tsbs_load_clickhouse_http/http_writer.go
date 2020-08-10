@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -55,7 +56,10 @@ func (w *HTTPWriter) initializeReq(req *fasthttp.Request, body []byte) {
 	req.Header.SetContentTypeBytes(textPlain)
 	req.Header.SetMethodBytes(methodPost)
 	req.Header.SetRequestURIBytes(w.url)
-	req.SetBody(body)
+	data := []byte("INSERT INTO benchmark.benchmark_table FORMAT JSONEachRow ")
+	data = append(data, body...)
+	req.SetBody(data)
+	log.Println(string(data))
 }
 
 func (w *HTTPWriter) executeReq(req *fasthttp.Request, resp *fasthttp.Response) (int64, error) {

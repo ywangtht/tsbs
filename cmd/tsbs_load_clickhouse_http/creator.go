@@ -17,24 +17,25 @@ func (d *dbCreator) Init() {
 }
 
 func (d *dbCreator) DBExists(dbName string) bool {
-	return false
+	return true
 }
 
 func (d *dbCreator) RemoveOldDB(dbName string) error {
 	data := fmt.Sprintf("DROP DATABASE %s", dbName)
-	resp, err := http.Post(d.daemonURL, "text/plain", bytes.NewBufferString(data))
-	if err != nil {
-		return fmt.Errorf("drop db error: %s", err.Error())
-	}
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("drop db returned non-200 code: %d", resp.StatusCode)
-	}
+	http.Post(d.daemonURL, "text/plain", bytes.NewBufferString(data))
+	/*
+		if err != nil {
+			return fmt.Errorf("drop db error: %s", err.Error())
+		}
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("drop db returned non-200 code: %d", resp.StatusCode)
+		}
+	*/
 	time.Sleep(time.Second)
 	return nil
 }
 
 func (d *dbCreator) CreateDB(dbName string) error {
-	log.Println("CreateDB called")
 	data := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName)
 	req, err := http.NewRequest("POST", d.daemonURL, bytes.NewBufferString(data))
 	if err != nil {
