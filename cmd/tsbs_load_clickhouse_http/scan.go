@@ -44,7 +44,7 @@ func (b *batch) Append(item *load.Point) {
 	that := item.Data.([]byte)
 	b.rows++
 	b.buf.Write(that)
-	//b.buf.Write(newLine)
+	b.buf.Write(newLine)
 }
 
 type factory struct{}

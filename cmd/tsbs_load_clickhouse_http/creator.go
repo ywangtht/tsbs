@@ -21,6 +21,7 @@ func (d *dbCreator) DBExists(dbName string) bool {
 }
 
 func (d *dbCreator) RemoveOldDB(dbName string) error {
+	log.Println("Removing DB: " + dbName)
 	data := fmt.Sprintf("DROP DATABASE %s", dbName)
 	http.Post(d.daemonURL, "text/plain", bytes.NewBufferString(data))
 	/*
@@ -36,6 +37,7 @@ func (d *dbCreator) RemoveOldDB(dbName string) error {
 }
 
 func (d *dbCreator) CreateDB(dbName string) error {
+	log.Println("Creating DB: " + dbName)
 	data := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName)
 	req, err := http.NewRequest("POST", d.daemonURL, bytes.NewBufferString(data))
 	if err != nil {
@@ -59,6 +61,7 @@ func (d *dbCreator) CreateDB(dbName string) error {
 }
 
 func (d *dbCreator) PostCreateDB(dbName string) error {
+	log.Println("Creating DB table")
 	createTableCmd := `CREATE TABLE benchmark.benchmark_table
 	(
 			phRecvTime      Datetime,
