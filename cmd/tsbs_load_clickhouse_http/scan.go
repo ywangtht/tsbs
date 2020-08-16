@@ -9,7 +9,7 @@ import (
 
 const errNotThreeTuplesFmt = "parse error: line does not have 3 tuples, has %d"
 
-var newLine = []byte(" ")
+var newLine = []byte("\n")
 
 type point struct {
 	Data interface{}
