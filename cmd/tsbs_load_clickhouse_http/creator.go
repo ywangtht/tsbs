@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -17,7 +19,33 @@ func (d *dbCreator) Init() {
 }
 
 func (d *dbCreator) DBExists(dbName string) bool {
-	return true
+	data := "exists table benchmark.benchmark_table"
+	req, err := http.NewRequest("POST", d.daemonURL, bytes.NewBufferString(data))
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	log.Println("response of DBExists")
+	log.Println(resp)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return false
+	}
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bodyString := string(bodyBytes)
+	if strings.TrimSpace(bodyString) == "1" {
+		log.Println("table exists")
+		return true
+	}
+	return false
 }
 
 func (d *dbCreator) RemoveOldDB(dbName string) error {
